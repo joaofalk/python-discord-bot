@@ -10,7 +10,6 @@ from discord.ext import commands
 load_dotenv()
 
 TOKEN = os.environ['DISCORD_TOKEN']
-GUILD_ID = os.environ['DISCORD_SERVER_ID']
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='#', intents=intents)
