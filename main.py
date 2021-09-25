@@ -6,11 +6,14 @@ from discord.ext.commands.core import command
 from discord.flags import Intents
 from dotenv import load_dotenv
 from discord.ext import commands
+from aerisweather.aerisweather import AerisWeather
+from aerisweather.requests.RequestLocation import RequestLocation
 
 load_dotenv()
 
 TOKEN = os.environ['DISCORD_TOKEN']
-
+aeris = AerisWeather(client_id=os.environ['CLIENT_ID'],
+                     client_secret=os.environ['CLIENT_SECRET'], app_id=os.environ['APP_ID'])
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='#', intents=intents)
 
@@ -58,6 +61,25 @@ async def create_channel(ctx, channel_name='Basic Bitch'):
     if not existing_channel:
         print(f'Creating a new channel: {channel_name}')
         await guild.create_text_channel(channel_name)
+
+
+@bot.command(name='weather', help='Gets weather info of a particular city')
+async def get_weather(ctx, city_name: str, state: str):
+    location = RequestLocation(city=city_name, state=state)
+    observation_list = aeris.observations(location=location)
+
+    for observation in observation_list:
+        place = observation.place
+        ob = observation.ob
+        tempF = ob.tempF
+        weather = ob.weather
+
+        response_text = f"""
+        The current weather for {place.name.capitalize()}, {place.state.upper()} is: 
+Conditions are current {weather} with a temp of {tempF} Fº
+"""
+
+        await ctx.send(response_text)
 
 
 @bot.event
